@@ -22,6 +22,7 @@ wheels/
 MANIFEST
 
 # Virtual environment
+program.log
 .venv/
 venv/
 ENV/
