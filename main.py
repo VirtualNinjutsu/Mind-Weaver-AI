@@ -49,6 +49,47 @@ def find_md(vault_path_str: str):
         # Обработка прочих ошибок
         logging.error(f"Unexpected error: {e}", exc_info=True)
         return None
+    
+def select_notes(available_notes: list[pathlib.Path]):
+    """
+    Реализует функцию выбора заметок из списка.
+
+    Args:
+        available_notes: Спосок объектов Path из доступных заметок
+
+    Returns:
+        Список объектов Path, представляющих выбранные пользователем заметки 
+    """
+    if not available_notes:
+        print("Нет доступных заметок")
+        return None
+    while True:
+        try:
+            selected_indexes_str = input(
+                "Введите номера заметок через запятую (например: 1,2,3,4,5) или 'все':"
+            ).lower()
+            if selected_indexes_str == 'все':
+                # Выбраны все заметки
+                selected_indexes = list(range(len(available_notes)))
+            else:
+                # Обработка введенных номеров заметок
+                selected_indexes = [
+                    int(index.strip()) - 1 for index in selected_indexes_str.split(",")
+                ]
+
+            # Проверка наличия выбранных заметок
+            for index in selected_indexes:
+                if not 0 <= index < len(available_notes):
+                    raise ValueError(
+                        f"Недопустимый номерзаметки: {index+1}. Введите номер от 1 до {len(available_notes)}"
+                    )
+            select_notes = [available_notes[index] for index in selected_indexes]
+            return select_notes
+        except ValueError as e:
+            logging.error(f"Input error: {e}")
+        except Exception as e:
+            print(f"Произошла непредвиденная ошибка: {e}. Попробуй еще раз.")
+            logging.error(f"Unexpected error: {e}", exc_info=True)
 
 # Точка входа
 
@@ -65,6 +106,14 @@ if __name__ == "__main__":
             print("\nНайденые заметки:")
             for n, note in enumerate(found_notes):
                 print(f"{n+1}. {note}")
+            select_notes = select_notes(found_notes)
+            if select_notes:
+                print("\nВыбранные заметки:")
+                for note in select_notes:
+                    print(f"- {note.name}")
+            else:
+                print("Заметки не выбранны")
+
         else:
             # Список пуст
             print("В директории нет Markdown файлов")
